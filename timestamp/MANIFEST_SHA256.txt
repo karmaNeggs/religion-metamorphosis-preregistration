@@ -1,0 +1,11 @@
+# MANIFEST — Phase 0 pre-registration snapshot (2026-08-09)
+# Generated: 2026-08-08T22:36:31Z
+# SHA-256 hashes of frozen files and of the snapshot archive
+
+29665df4f303a753e1aa2b00edd00e97cb582ff8d737a26baa1e514f8c7b27e8 PREREG_Study1_Ngram_H1.md
+e841cf6474b279e1996e101126144cc2bbd4cc0586d3c70aa20740d6e1e5a843 PREREG_Study2_Trends_H1.md
+9da65e3b0adf53396d05b2ab15bf61b810706833d0afb057b086a2e3800f6ea2 LEXICONS_Codebook.md
+bf4ac807cd60060ba06970aa6ad2e897959347448f3e9f671c338c914dec2d77 GOLD_SET_Plan.md
+bdaec6a1251efa21415e6cf65fb6e193ebd37711743713a23fa07493cf4150dd OSF_Checklist.md
+ecf681e4fcb6aee31e390759e7aedbc57b180ad41ac6d6f59319927e548113b1 README_Phase0.md
+504369823c1f0bb1c37dce532011df1ea64b0a86ba9a8a2f60b28c3d69a85b1e timestamp/preregistration_snapshot_2026-08-09.zip
