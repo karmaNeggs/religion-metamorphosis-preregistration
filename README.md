@@ -50,5 +50,5 @@ unzip -l preregistration_snapshot_2026-08-09.zip
 
 The STUDY_PLAN (2026-08-09, locked decision #8) specified pre-registration on OSF with a DOI.
 OSF was skipped by the author; this Bitcoin-anchored timestamp + Software Heritage archive
-(see `swh_snapshot_url.txt` when present) replaces it. The papers will disclose this as a
+(see TIMESTAMP_PROOF.md §3) replaces it. The papers will disclose this as a
 documented deviation: the protocols are time-stamped and immutable, but carry no OSF DOI.
