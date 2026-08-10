@@ -42,7 +42,9 @@ def fetch(term: str) -> dict:
         "year_end": YEAR_END,
         "corpus": CORPUS,
         "smoothing": 0,
-        "case_insensitive": True,
+        # NB: must be the lowercase string "true" — requests serializes Python
+        # True as "True", which the API silently ignores (verified 2026-08-10)
+        "case_insensitive": "true",
     }
     for attempt in range(1, 11):
         try:
@@ -77,7 +79,7 @@ def main() -> None:
             "year_start": YEAR_START,
             "year_end": YEAR_END,
             "smoothing": 0,
-            "case_insensitive": True,
+            "case_insensitive": "true",
             "fetched_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "response": fetch(term),
         }

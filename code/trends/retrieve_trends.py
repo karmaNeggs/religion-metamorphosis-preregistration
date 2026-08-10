@@ -45,9 +45,9 @@ GROUPS = {
 OUT = pathlib.Path(__file__).resolve().parents[2] / "data" / "raw" / "trends"
 
 
-def pull(kw_list: list[str], timeframe: str) -> pd.DataFrame:
+def pull(kw_list: list[str], timeframe: str, max_attempts: int = 7) -> pd.DataFrame:
     """One build_payload + interest_over_time call with 429 backoff."""
-    for attempt in range(1, 8):
+    for attempt in range(1, max_attempts + 1):
         try:
             pt = TrendReq(hl="en-US", tz=0)
             pt.build_payload(kw_list, timeframe=timeframe, geo=GEO, gprop="")
@@ -59,11 +59,11 @@ def pull(kw_list: list[str], timeframe: str) -> pd.DataFrame:
             wait = min(10 * 2 ** attempt, 180)
             print(f"  pull failed ({exc}); retry in {wait}s")
             time.sleep(wait)
-    raise RuntimeError(f"pull failed after 7 attempts: {kw_list}")
+    raise RuntimeError(f"pull failed after {max_attempts} attempts: {kw_list}")
 
 
-def state_pull(term: str) -> pd.DataFrame:
-    for attempt in range(1, 8):
+def state_pull(term: str, max_attempts: int = 7) -> pd.DataFrame:
+    for attempt in range(1, max_attempts + 1):
         try:
             pt = TrendReq(hl="en-US", tz=0)
             pt.build_payload([term], timeframe=TIMEFRAME, geo=GEO, gprop="")
@@ -80,15 +80,24 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--states", action="store_true", help="also fetch state-level region data")
     parser.add_argument("--reps", type=int, default=REPS, help="number of pulls per group")
+    parser.add_argument("--max-attempts", type=int, default=7, help="429 retries per pull (lower = fail fast on rate-limit blocks)")
     args = parser.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
 
     pulled: dict[str, list[pd.DataFrame]] = {g: [] for g in GROUPS}
     for rep in range(1, args.reps + 1):
         for group, kws in GROUPS.items():
-            print(f"[rep {rep}/{args.reps}] group {group}: {kws}")
-            df = pull(kws, TIMEFRAME)
             path = OUT / f"group_{group}_rep{rep}.csv"
+            if path.exists():
+                print(f"[rep {rep}/{args.reps}] group {group}: cached, skipping")
+                pulled[group].append(pd.read_csv(path, parse_dates=[0], index_col=0))
+                continue
+            print(f"[rep {rep}/{args.reps}] group {group}: {kws}")
+            try:
+                df = pull(kws, TIMEFRAME, max_attempts=args.max_attempts)
+            except RuntimeError as exc:
+                print(f"  FAILED (rate limit) — {exc}; rep left missing, continuing (resume later)")
+                continue
             df.to_csv(path)
             pulled[group].append(df)
             time.sleep(20)  # rate-limit courtesy between pulls
@@ -106,7 +115,7 @@ def main() -> None:
         for term in ["church", "prayer", "bible", "church service", "meditation",
                      "mindfulness", "manifestation", "chakras", "astrology"]:
             print(f"state pull: {term!r}")
-            reg = state_pull(term)
+            reg = state_pull(term, max_attempts=args.max_attempts)
             reg.to_csv(state_dir / f"{term.replace(' ', '_')}_region.csv")
             time.sleep(15)
 
