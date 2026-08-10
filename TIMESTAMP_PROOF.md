@@ -21,9 +21,13 @@ Full per-file manifest: see `MANIFEST_SHA256.txt`.
 - Status at snapshot time: submitted + pending Bitcoin confirmation (normal — calendars
   confirm into a block within ~1–2 days). The `.ots` files bind the hashes to calendar
   attestations; the Bitcoin Merkle anchor completes the chain.
-- **To finalize:** run `ots upgrade preregistration_snapshot_2026-08-09.zip.ots` (and the
-  manifest proof) in a few days, then `ots verify` will resolve to a block height. Re-verify
-  before any manuscript submission and record the block height here.
+- **CONFIRMED 2026-08-10:** both proofs upgraded; attestations resolved to **Bitcoin blocks
+  961644, 961645, and 961661** (three independent calendar attestations, merkle roots below):
+  - `afab5da2b944f7ddc28e380a536442d895865fc896a2e132e818cb4641b74176` (block 961645)
+  - `ab547c0ac1e04282f11573641cbe7b5aac740bc6318834ced91601d819e802f7` (block 961661)
+  - `f63d7634cad5a1a559dd869a4fee7d2644a199b1f17e7ba2ca8f9fbb33fe6feb` (block 961644)
+  Verify via `ots info <file>.ots` (no Bitcoin node required; `ots verify` needs a node or
+  `--no-bitcoin` for structural verification).
 - **Verification (anyone):**
   ```
   pip install opentimestamps-client
@@ -53,6 +57,6 @@ Full per-file manifest: see `MANIFEST_SHA256.txt`.
 
 ## 5. Follow-up checklist
 
-- [ ] `ots upgrade` both `.ots` files in ~2 days; record final Bitcoin block height(ies) here.
-- [ ] Paste GitHub + SWH links into README.md §10 and STUDY_PLAN_TwoPapers.md decision #8.
-- [ ] Keep the repo untouched from now on (any further versioning happens in separate repos/folders).
+- [x] `ots upgrade` both `.ots` files — **DONE 2026-08-10; confirmed at blocks 961644/961645/961661**
+- [x] Paste GitHub + SWH links into README.md §10 and STUDY_PLAN_TwoPapers.md decision #8
+- [ ] Keep the repo untouched from now on (any further versioning happens in separate repos/folders)
