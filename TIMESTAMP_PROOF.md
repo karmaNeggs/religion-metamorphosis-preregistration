@@ -55,8 +55,25 @@ Full per-file manifest: see `MANIFEST_SHA256.txt`.
   than platform-based; the registration is a repository snapshot, not an OSF form. The
   discovery paper will state this as a documented deviation from STUDY_PLAN decision #8.
 
-## 5. Follow-up checklist
+## 5. AMENDMENTS SNAPSHOT (2026-08-10) — deviation-logged protocol versions
+
+The frozen v1.0 texts are never edited. On 2026-08-10 the two deviations (LLM judge panel
+replacing human raters; era-split GS-1 sampling) were entered into the §10 logs of the LIVE
+protocol documents. A second snapshot of the amended documents was created and timestamped:
+
+| Artifact | SHA-256 |
+|---|---|
+| `preregistration_snapshot_2026-08-10_amendments.zip` (PREREG_Study1 + PREREG_Study2 + GOLD_SET_Plan + LEXICONS_Codebook, each containing the §10/logged amendment) | `dc65211f815fd05eaa310495e74e594fcb0d2fb6cc9020252d14e5d5eb49b1f5` |
+| `MANIFEST_SHA256_amendments.txt` | see file |
+
+- Stamped **2026-08-10 (2026-08-11 00:31 CEST)** via OpenTimestamps to calendars:
+  `finney.calendar.eternitywall.com`, `btc.calendar.catallaxy.com`,
+  `alice.btc.calendar.opentimestamps.org` — **pending Bitcoin confirmation** (upgrade in ~2 days).
+- File hash confirmed by `ots info` (`dc65211f…` matches the manifest).
+
+## 6. Follow-up checklist
 
 - [x] `ots upgrade` both `.ots` files — **DONE 2026-08-10; confirmed at blocks 961644/961645/961661**
 - [x] Paste GitHub + SWH links into README.md §10 and STUDY_PLAN_TwoPapers.md decision #8
+- [ ] `ots upgrade preregistration_snapshot_2026-08-10_amendments.zip.ots` (~2 days after 2026-08-10; record block heights)
 - [ ] Keep the repo untouched from now on (any further versioning happens in separate repos/folders)
