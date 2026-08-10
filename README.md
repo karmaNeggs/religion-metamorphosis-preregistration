@@ -52,3 +52,14 @@ The STUDY_PLAN (2026-08-09, locked decision #8) specified pre-registration on OS
 OSF was skipped by the author; this Bitcoin-anchored timestamp + Software Heritage archive
 (see TIMESTAMP_PROOF.md §3) replaces it. The papers will disclose this as a
 documented deviation: the protocols are time-stamped and immutable, but carry no OSF DOI.
+
+## Updates after the frozen snapshot (deviation logs)
+
+- `PREREG_Study1_Ngram_H1.md` and `PREREG_Study2_Trends_H1.md` are the LIVE protocol
+  documents. The frozen v1.0 text lives in `preregistration_snapshot_2026-08-09.zip`
+  (sha256-pinned + Bitcoin-timestamped). Any change after freezing appears ONLY in the
+  §10 deviation logs of these live files, per the protocols' own amendment mechanism.
+- 2026-08-10 deviation entries: (1) human raters replaced by a 3-model LLM judge panel
+  (nemotron-3-ultra-free / laguna-s-2.1-free / mimo-v2.5-free; author directive), and
+  (2) GS-1 snippet sampling split by era via the Google Books API `publishedDate` filter.
+  GS-1 pipeline: `code/goldset/build_gs1.py` + `code/goldset/judge_gs1.py`.
