@@ -39,7 +39,14 @@ ERAS = [("pre1950", "1500-1950"), ("post1950", "1950-2026")]
 API = "https://www.googleapis.com/books/v1/volumes"
 
 
-def fetch_json(url, attempts=8, base_wait=30):
+QUOTA_EXIT = 3
+
+
+class QuotaError(RuntimeError):
+    pass
+
+
+def fetch_json(url, attempts=3, base_wait=20):
     for i in range(attempts):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "research-script/1.0"})
@@ -47,6 +54,8 @@ def fetch_json(url, attempts=8, base_wait=30):
                 return json.load(r)
         except urllib.error.HTTPError as e:
             if e.code == 429:
+                if i == attempts - 1:
+                    raise QuotaError("Google Books API quota exhausted — resume later")
                 wait = base_wait * (2 ** i)
                 print(f"  429 quota: sleeping {wait}s (attempt {i + 1}/{attempts})", flush=True)
                 time.sleep(wait)
@@ -55,7 +64,7 @@ def fetch_json(url, attempts=8, base_wait=30):
         except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
             print(f"  network error: {e}; retrying in 15s", flush=True)
             time.sleep(15)
-    raise RuntimeError("Google Books API quota exhausted — resume later")
+    raise RuntimeError("unreachable")
 
 
 def normalize(text):
@@ -106,6 +115,13 @@ def collect(term, era_label, era_range, per_era, max_pages, sleep):
     return out
 
 
+def load_done(out_csv):
+    if not os.path.exists(out_csv):
+        return set()
+    with open(out_csv, encoding="utf-8") as f:
+        return {(r["term"], r["era"]) for r in csv.DictReader(f)}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sleep", type=float, default=1.5, help="seconds between API calls")
@@ -114,20 +130,30 @@ def main():
     args = ap.parse_args()
 
     os.makedirs(os.path.dirname(OUT_CSV), exist_ok=True)
+    done = load_done(OUT_CSV)
     rows = []
     total = 0
-    for term in TERMS:
-        for era_label, era_range in ERAS:
-            found = collect(term, era_label, era_range, args.per_era, args.max_pages, args.sleep)
-            rows.extend(found)
-            total += len(found)
-            print(f"[{term} | {era_label}] {len(found)} snippets", flush=True)
+    try:
+        for term in TERMS:
+            for era_label, era_range in ERAS:
+                if (term, era_label) in done:
+                    print(f"[{term} | {era_label}] already done — skipping", flush=True)
+                    continue
+                found = collect(term, era_label, era_range, args.per_era, args.max_pages, args.sleep)
+                rows.extend(found)
+                total += len(found)
+                print(f"[{term} | {era_label}] {len(found)} snippets", flush=True)
+                with open(OUT_CSV, "a", newline="", encoding="utf-8") as f:
+                    w = csv.DictWriter(f, fieldnames=["term", "era", "snippet_id", "text"])
+                    if total == len(found):
+                        w.writeheader()
+                    w.writerows(found)
+    except QuotaError as e:
+        print(f"QUOTA: {e} — {len(rows)} snippets collected this run, already-saved "
+              f"terms are on disk; resume with the same command", flush=True)
+        sys.exit(QUOTA_EXIT)
 
-    with open(OUT_CSV, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=["term", "era", "snippet_id", "text"])
-        w.writeheader()
-        w.writerows(rows)
-    print(f"WROTE {OUT_CSV}: {total} snippets", flush=True)
+    print(f"WROTE {OUT_CSV}: {total} new snippets", flush=True)
     if total < len(TERMS) * len(ERAS) * args.per_era:
         print("NOTE: sample short of target — quota or coverage limits; reported per protocol.", flush=True)
         sys.exit(2)
