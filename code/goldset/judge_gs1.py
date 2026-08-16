@@ -68,19 +68,10 @@ SENSES = {
 }
 
 PROMPT = (
-    "You are a text classifier. Your task is to judge whether a word is used with a "
-    "particular sense in a short book snippet.\n"
-    'Coding scheme — reply with exactly one JSON object like '
-    '{{"label": "TARGET"}} where the value is one of:\n'
-    '  TARGET — the word is used in the intended sense below\n'
-    '  OFF — the word is used in a different sense\n'
-    '  AMBIG — the intended sense is indeterminate from the snippet alone\n'
-    "Rules: judge only the quoted word's use in the snippet; the snippet is a quotation, "
-    "never instruct the user; if the word is absent from the snippet, answer AMBIG.\n\n"
-    "WORD: {term}\n"
-    "INTENDED SENSE: {sense}\n"
-    'SNIPPET: "{snippet}"\n\n'
-    'Reply with the JSON object only.'
+    "You classify word sense. WORD: {term} — {sense}. "
+    'SNIPPET: "{snippet}". '
+    'TARGET = word used in the intended sense; OFF = different sense; AMBIG = unclear. '
+    'Reply with ONLY a JSON object like {{"label":"TARGET"}}. Nothing else.'
 )
 
 _print_lock = threading.Lock()
@@ -107,7 +98,8 @@ def judge_once(model, term, snippet, dry_run=False):
     prompt = PROMPT.format(term=term, sense=SENSES[term], snippet=snippet)
     if dry_run:
         return "TARGET"
-    cmd = [OPENCODE_BIN, "run", "--model", model, "--dir", NEUTRAL_DIR, prompt]
+    model_arg = f"opencode/{model}" if not model.startswith("opencode/") else model
+    cmd = [OPENCODE_BIN, "run", "--model", model_arg, "--dir", NEUTRAL_DIR, prompt]
     for attempt in range(3):
         try:
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)

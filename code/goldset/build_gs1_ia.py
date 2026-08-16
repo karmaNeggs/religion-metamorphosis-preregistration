@@ -49,7 +49,7 @@ SEARCH = "https://archive.org/advancedsearch.php"
 UA = {"User-Agent": "research-script/1.0 (scholarly content analysis)"}
 
 
-def get_json(url, timeout=60, attempts=4):
+def get_json(url, timeout=20, attempts=3):
     for i in range(attempts):
         try:
             req = urllib.request.Request(url, headers=UA)
@@ -99,8 +99,9 @@ def item_meta(identifier):
 
 
 def inside_matches(identifier, server, dir_, term):
+    q = urllib.parse.quote(term)
     url = (f"https://{server}/fulltext/inside.php?item_id={identifier}"
-           f"&doc={identifier}&path=/{dir_}&q={term}")
+           f"&doc={identifier}&path=/{dir_}&q={q}")
     d = get_json(url)
     if not d:
         return []
@@ -170,11 +171,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sleep", type=float, default=2.0)
     ap.add_argument("--per-era", type=int, default=25)
-    ap.add_argument("--max-items", type=int, default=20, help="max advancedsearch pages per era")
+    ap.add_argument("--max-items", type=int, default=2, help="max advancedsearch pages per era (200 items)")
     args = ap.parse_args()
 
     os.makedirs(os.path.dirname(OUT_CSV), exist_ok=True)
     done = load_done(OUT_CSV)
+    new_file = not os.path.exists(OUT_CSV) or os.path.getsize(OUT_CSV) == 0
     rows, total = [], 0
     for term in TERMS:
         for era_label, era_range in ERAS:
@@ -187,7 +189,7 @@ def main():
             print(f"[{term} | {era_label}] {len(found)} snippets", flush=True)
             with open(OUT_CSV, "a", newline="", encoding="utf-8") as f:
                 w = csv.DictWriter(f, fieldnames=["term", "era", "snippet_id", "text"])
-                if total == len(found):
+                if new_file and total == len(found):
                     w.writeheader()
                 w.writerows(found)
 
