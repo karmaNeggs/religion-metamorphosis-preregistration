@@ -102,7 +102,7 @@ def judge_once(model, term, snippet, dry_run=False):
     cmd = [OPENCODE_BIN, "run", "--model", model_arg, "--dir", NEUTRAL_DIR, prompt]
     for attempt in range(3):
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             label = parse_label(r.stdout + r.stderr)
             if label:
                 return label
@@ -113,7 +113,7 @@ def judge_once(model, term, snippet, dry_run=False):
         except FileNotFoundError:
             log(f"  [{model}] opencode binary not found: {OPENCODE_BIN}")
             return None
-        time.sleep(20 * (2 ** attempt))
+        time.sleep(5 * (2 ** attempt))
     return None
 
 
